@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import { AppRoutes } from './routes';
 import { errorHandler } from './middlewares/error.middleware';
 
@@ -9,6 +9,7 @@ export class App {
     this.app = express();
     this.initializeMiddlewares();
     this.initializeRoutes();
+    this.initializeNotFoundHandler();
     this.initializeErrorHandling();
   }
 
@@ -20,6 +21,13 @@ export class App {
   private initializeRoutes(): void {
     const appRoutes = new AppRoutes();
     this.app.use('/api', appRoutes.router);
+  }
+
+  private initializeNotFoundHandler(): void {
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      const error = new Error(`Route not found: ${req.method} ${req.originalUrl}`);
+      next(error);
+    });
   }
 
   private initializeErrorHandling(): void {
